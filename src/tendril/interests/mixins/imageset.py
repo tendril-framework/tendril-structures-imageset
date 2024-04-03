@@ -62,7 +62,7 @@ class InterestImageSetMixin(InterestBase):
             asyncio.ensure_future(self._publish_files(publishable))
         return result, msg
 
-    # TODO This may collide with other mixins. Improve superstructure.
+    # TODO This may collide with other mixins. Improve superstructure. Perhaps a publishable mixin?
     async def _publish_files(self, stored_files):
         for stored_file in stored_files:
             logger.info(f"Publishing file {stored_file.filename}")
@@ -76,7 +76,7 @@ class InterestImageSetMixin(InterestBase):
                 self._report_filestore_error(None, e, "Publishing imageset file")
                 continue
 
-    # TODO This may collide with other mixins. Improve superstructure.
+    # TODO This may collide with other mixins. Improve superstructure or standardize. Perhaps a publishable mixin?
     def publishable(self):
         rv = []
         for content in self.model_instance.imageset.contents:
@@ -84,7 +84,7 @@ class InterestImageSetMixin(InterestBase):
                 rv.append(content.storedfile)
         return rv
 
-    # TODO This may collide with other mixins. Improve superstructure.
+    # TODO This may collide with other mixins. Improve superstructure or standardize. Perhaps a publishable mixin?
     def published(self):
         if self.status != LifecycleStatus.ACTIVE:
             return False
@@ -95,7 +95,7 @@ class InterestImageSetMixin(InterestBase):
 
     @with_db
     def _commit_to_db(self, must_create=False, can_create=True, session=None):
-        super(InterestImagesetMixin, self)._commit_to_db(must_create=must_create,
+        super(InterestImageSetMixin, self)._commit_to_db(must_create=must_create,
                                                          can_create=can_create,
                                                          session=session)
         if not self.model_instance.imageset_id:
@@ -133,7 +133,7 @@ class InterestImageSetMixin(InterestBase):
             )
 
     @with_db
-    @require_state((LifecycleStatus.NEW))
+    @require_state((LifecycleStatus.NEW, LifecycleStatus.APPROVAL, LifecycleStatus.ACTIVE))
     @require_permission('add_artefact', strip_auth=False)
     def upload_imageset_content(self, file, rename_to=None, token_id=None, auth_user=None, session=None):
         storage_folder = f'{self.id}'
@@ -153,6 +153,7 @@ class InterestImageSetMixin(InterestBase):
         # 2. Upload File to Bucket
         # TODO This should add a label or title to the storedfile entry. This will need
         #  the filestore code to be edited to use the existing label field on artefact.
+        #  We're currently forcing a prefix on the filename, which is a little ugly.
         try:
             upload_response = async_to_sync(self.upload_bucket.upload)(
                 file=(os.path.join(storage_folder, filename), file.file),
@@ -177,7 +178,7 @@ class InterestImageSetMixin(InterestBase):
     @require_permission('add_artefact', strip_auth=False)
     def imageset_set_default_duration(self, default_duration=10, auth_user=None, session=None):
 
-        if not isinstance(default_duration, int) or default_duration <= 1:
+        if not isinstance(default_duration, int) or default_duration <= 0:
             raise ValueError("Expecting a positive integer for duration")
 
         self.model_instance.imageset.default_duration = default_duration
@@ -188,10 +189,27 @@ class InterestImageSetMixin(InterestBase):
 
     @with_db
     @require_state((LifecycleStatus.NEW, LifecycleStatus.APPROVAL, LifecycleStatus.ACTIVE))
+    @require_permission('edit', strip_auth=False)
+    def imageset_set_colors(self, bgcolor, color, auth_user=None, session=None):
+        self.model_instance.imageset.bgcolor = bgcolor
+        self.model_instance.imageset.color = color
+        session.add(self.model_instance.imageset)
+        session.flush()
+        return {'interest_id': self.id,
+                'bgcolor': self.model_instance.imageset.bgcolor,
+                'color': self.model_instance.imageset.color}
+
+    @with_db
+    @require_state((LifecycleStatus.NEW, LifecycleStatus.APPROVAL, LifecycleStatus.ACTIVE))
     @require_permission('read', strip_auth=False)
     def imageset_get_available_contents(self, auth_user=None, session=None):
         # TODO Use artefacts instead and filter by label. Presently, files not
         #  in the current imageset will not be shown.
+        #  Also consider using the filename prefix in the interim to do this.
+        #  get_stored_files might be able to get the job done, though you will need
+        #  to check on both the upload and publish buckets. Alternatively, a direct
+        #  query on the database might be easier. Filter on interest id and then
+        #  on filename.
         contents = self.model_instance.imageset.contents
         contents = [{x.export()} for x in contents]
 
@@ -200,7 +218,20 @@ class InterestImageSetMixin(InterestBase):
                 'contents': contents}
 
     @with_db
-    @require_state((LifecycleStatus.NEW))
+    @require_state((LifecycleStatus.NEW, LifecycleStatus.APPROVAL, LifecycleStatus.ACTIVE))
+    @require_permission('read', strip_auth=False)
+    def imageset_get_contents(self, auth_user=None, session=None):
+        contents = self.model_instance.imageset.contents
+        contents = [x.export() for x in contents]
+
+        return {'interest_id': self.id,
+                'default_duration': self.model_instance.imageset.default_duration,
+                'bgcolor': self.model_instance.imageset.bgcolor,
+                'color': self.model_instance.imageset.color,
+                'contents': contents}
+
+    @with_db
+    @require_state((LifecycleStatus.NEW, LifecycleStatus.APPROVAL, LifecycleStatus.ACTIVE))
     @require_permission('add_artefact', strip_auth=False)
     def imageset_add(self, storedfile_id, position=None, duration=None, auth_user=None, session=None):
         # Get Content and Verify Access
@@ -223,7 +254,7 @@ class InterestImageSetMixin(InterestBase):
         return True
 
     @with_db
-    @require_state((LifecycleStatus.NEW))
+    @require_state((LifecycleStatus.NEW, LifecycleStatus.ACTIVE, LifecycleStatus.APPROVAL))
     @require_permission('add_artefact', strip_auth=False)
     def imageset_remove(self, position=None, auth_user=None, session=None):
         imageset_remove_content(id=self.model_instance.imageset_id,

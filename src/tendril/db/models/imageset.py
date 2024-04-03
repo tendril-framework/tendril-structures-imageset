@@ -22,6 +22,7 @@ class ImageSetModel(DeclBase, BaseMixin, TimestampMixin):
     id = Column(Integer, primary_key=True)
     default_duration = Column(Integer, nullable=False, default=10)
     bgcolor = Column(VARCHAR(9), nullable=True)
+    color = Column(VARCHAR(9), nullable=True)
 
     contents: Mapped[List["ImageSetAssociationModel"]] = \
         relationship(order_by="ImageSetAssociationModel.position")
@@ -30,6 +31,7 @@ class ImageSetModel(DeclBase, BaseMixin, TimestampMixin):
         rv = {
             'default_duration': self.default_duration,
             'bgcolor': self.bgcolor,
+            'color': self.color,
             'contents': [x.export() for x in self.contents]
         }
         return rv
@@ -49,5 +51,5 @@ class ImageSetAssociationModel(DeclBase):
             'position': self.position,
             'duration': self.duration,
             'storedfile_id': self.storedfile_id,
-            'content': self.content.expose_uri,
+            'content': self.storedfile.expose_uri,
         }

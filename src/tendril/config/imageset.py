@@ -57,7 +57,7 @@ config_elements_imageset = [
         "will not have this bucket by default. You must create it or choose one that exists."
     ),
     ConfigOption(
-        'MEDIA_PUBLISHING_FILESTORE_BUCKET',
+        'IMAGESET_PUBLISHING_FILESTORE_BUCKET',
         '"cdn"',
         "The filestore bucket in which published imageset files are to be written. Note that "
         "filestore will not have this bucket by default. You must create it or choose one "
