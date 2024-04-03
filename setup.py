@@ -28,7 +28,12 @@ def read(fname):
     return content
 
 
-core_dependencies = []
+core_dependencies = [
+    'tendril-utils-media',
+    'tendril-utils-db',
+    'tendril-filestore',
+    'tendril-caching',
+]
 
 install_requires = core_dependencies + ['wheel']
 
