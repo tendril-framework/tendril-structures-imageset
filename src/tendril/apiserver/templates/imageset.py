@@ -241,7 +241,7 @@ class InterestImageSetRouterGenerator(ApiRouterGenerator):
                             # response_model=,
                              dependencies=[auth_spec(scopes=[f'{prefix}:write'])])
 
-        router.add_api_route("/{id}/sequence/remove/{position}", self.remove_from_imageset, methods=['POST'],
+        router.add_api_route("/{id}/imageset/remove/{position}", self.remove_from_imageset, methods=['POST'],
                              # response_model=,
                              dependencies=[auth_spec(scopes=[f'{prefix}:write'])])
 
