@@ -142,7 +142,7 @@ class InterestImageSetMixin(InterestMixinBase):
         storage_folder = f'{self.id}'
         if token_id:
             tokens.update(self.token_namespace, token_id,
-                          state=TokenStatus.INPROGRESS, max=3,
+                          state=TokenStatus.INPROGRESS, max=2,
                           current="Parsing File Information")
 
         # 1. Parse Media Information
