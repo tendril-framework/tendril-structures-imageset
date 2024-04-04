@@ -38,9 +38,9 @@ class InterestImageSetMixin(InterestMixinBase):
     additional_export_fields = ['imageset']
 
     def __init__(self, *args, **kwargs):
-        super(InterestImageSetMixin, self).__init__(*args, **kwargs)
         self._upload_bucket = None
         self._publish_bucket = None
+        super(InterestImageSetMixin, self).__init__(*args, **kwargs)
 
     @property
     def imageset(self):
