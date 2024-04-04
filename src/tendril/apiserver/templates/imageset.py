@@ -235,7 +235,7 @@ class InterestImageSetRouterGenerator(ApiRouterGenerator):
 
         router.add_api_route("/{id}/imageset", self.get_imageset_contents, methods=['GET'],
                              # response_model=,
-                             dependencies=[auth_spec(scopes=[f'{prefix}:write'])])
+                             dependencies=[auth_spec(scopes=[f'{prefix}:read'])])
 
         router.add_api_route("/{id}/imageset/add", self.add_to_imageset, methods=['POST'],
                             # response_model=,
