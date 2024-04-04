@@ -38,8 +38,7 @@ class InterestImageSetMixin(InterestMixinBase):
     additional_export_fields = ['imageset']
 
     def __init__(self, *args, **kwargs):
-        self._upload_bucket = None
-        self._publish_bucket = None
+        # TODO This never seems to get called. Figure out why.
         super(InterestImageSetMixin, self).__init__(*args, **kwargs)
 
     @property
@@ -108,6 +107,8 @@ class InterestImageSetMixin(InterestMixinBase):
     # TODO This may collide with other mixins. Improve superstructure or standardize. Maybe a filestore integration mixin?
     @property
     def upload_bucket(self):
+        if not hasattr(self, '_upload_bucket'):
+            self._upload_bucket = None
         if not self._upload_bucket:
             self._upload_bucket = buckets.get_bucket(self.upload_bucket_name)
         return self._upload_bucket
@@ -115,6 +116,8 @@ class InterestImageSetMixin(InterestMixinBase):
     # TODO This may collide with other mixins. Improve superstructure or standardize. Maybe a filestore integration mixin?
     @property
     def publish_bucket(self):
+        if not hasattr(self, '_publish_bucket'):
+            self._publish_bucket = None
         if not self._publish_bucket:
             self._publish_bucket = buckets.get_bucket(self.publish_bucket_name)
         return self._publish_bucket
