@@ -10,7 +10,7 @@ from tendril.filestore import buckets
 from tendril.config import IMAGESET_UPLOAD_FILESTORE_BUCKET
 from tendril.config import IMAGESET_PUBLISHING_FILESTORE_BUCKET
 
-from tendril.interests.base import InterestBase
+from tendril.interests.mixins.base import InterestMixinBase
 from tendril.common.states import LifecycleStatus
 from tendril.authz.roles.interests import require_state
 from tendril.authz.roles.interests import require_permission
@@ -31,7 +31,7 @@ from tendril.utils import log
 logger = log.get_logger(__name__, log.DEFAULT)
 
 
-class InterestImageSetMixin(InterestBase):
+class InterestImageSetMixin(InterestMixinBase):
     token_namespace = 'isu'
     upload_bucket_name = IMAGESET_UPLOAD_FILESTORE_BUCKET
     publish_bucket_name = IMAGESET_PUBLISHING_FILESTORE_BUCKET
