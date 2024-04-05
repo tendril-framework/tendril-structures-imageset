@@ -17,6 +17,20 @@ from tendril.filestore.db.model import StoredFileModel
 from tendril.utils.pydantic import TendrilTBaseModel
 
 
+class ImageSetContentTModel(TendrilTBaseModel):
+    position: int
+    duration: Optional[int]
+    storedfile_id: Optional[int]
+    content: str
+
+
+class ImageSetTModel(TendrilTBaseModel):
+    default_duration: Optional[int]
+    bgcolor: Optional[str]
+    color: Optional[str]
+    contents: Optional[List[ImageSetContentTModel]]
+
+
 class ImageSetModel(DeclBase, BaseMixin, TimestampMixin):
 
     id = Column(Integer, primary_key=True)
