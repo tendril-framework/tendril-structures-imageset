@@ -35,7 +35,6 @@ class InterestImageSetMixin(InterestMixinBase):
     token_namespace = 'isu'
     upload_bucket_name = IMAGESET_UPLOAD_FILESTORE_BUCKET
     publish_bucket_name = IMAGESET_PUBLISHING_FILESTORE_BUCKET
-    additional_export_fields = ['imageset']
 
     def __init__(self, *args, **kwargs):
         # TODO This never seems to get called. Figure out why.
