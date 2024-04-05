@@ -224,7 +224,7 @@ class InterestImageSetMixin(InterestMixinBase):
 
     @with_db
     @require_state((LifecycleStatus.NEW, LifecycleStatus.APPROVAL, LifecycleStatus.ACTIVE))
-    @require_permission('read', strip_auth=False)
+    @require_permission('read', strip_auth=False, required=False)
     def imageset_get_contents(self, auth_user=None, session=None):
         contents = self.model_instance.imageset.contents
         contents = [x.export() for x in contents]
