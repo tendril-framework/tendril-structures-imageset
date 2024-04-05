@@ -91,8 +91,8 @@ class InterestImageSetRouterGenerator(ApiRouterGenerator):
                 _ = uuid.UUID(file_name[3:], version=1)
                 storage_filename = f'{file_name}{file_ext}'
             except (ValueError, AssertionError):
-                logger.warn(f"Got a non-compliant filename {file_name} from the frontend for an imageset "
-                            "upload. Check frontend implementation. We want a UUIDv1 prefixed by 'is_'.")
+                # logger.warn(f"Got a non-compliant filename {file_name} from the frontend for an imageset "
+                #             "upload. Check frontend implementation. We want a UUIDv1 prefixed by 'is_'.")
                 storage_filename = f"is_{uuid.uuid4()}{file_ext}"
 
             # The above prechecks are required at the API level here since we are delegating
