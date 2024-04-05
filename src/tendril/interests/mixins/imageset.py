@@ -142,7 +142,7 @@ class InterestImageSetMixin(InterestMixinBase):
         storage_folder = f'{self.id}'
         if token_id:
             tokens.update(self.token_namespace, token_id,
-                          state=TokenStatus.INPROGRESS, max=2,
+                          state=TokenStatus.INPROGRESS, max=3,
                           current="Parsing File Information")
 
         # 1. Parse Media Information
@@ -165,13 +165,16 @@ class InterestImageSetMixin(InterestMixinBase):
         except HTTPStatusError as e:
             self._report_filestore_error(token_id, e, "uploading imageset file to bucket")
             return
-        else:
-            if token_id:
-                tokens.update(self.token_namespace, token_id,
-                              metadata={'storedfile_id': upload_response['storedfileid']})
 
         if token_id:
-            tokens.update(self.token_namespace, token_id, current="Finishing", done=2)
+            tokens.update(self.token_namespace, token_id, done=2,
+                          current="Linking File to Imageset",
+                          metadata={'storedfile_id': upload_response['storedfileid']})
+
+        self.imageset_add(upload_response['storedfileid'], auth_user=auth_user, session=session)
+
+        if token_id:
+            tokens.update(self.token_namespace, token_id, current="Finishing", done=3)
 
         # 7. Close Upload Ticket
         tokens.close(self.token_namespace, token_id)
@@ -264,4 +267,5 @@ class InterestImageSetMixin(InterestMixinBase):
                                 position=position,
                                 session=session)
         imageset_heal_positions(id=self.model_instance.imageset_id, session=session)
+        # TODO Remove storedfile as well.
         return True
