@@ -153,13 +153,10 @@ class InterestImageSetMixin(InterestMixinBase):
                           current="Uploading File to Filestore", done=1)
 
         # 2. Upload File to Bucket
-        # TODO This should add a label or title to the storedfile entry. This will need
-        #  the filestore code to be edited to use the existing label field on artefact.
-        #  We're currently forcing a prefix on the filename, which is a little ugly.
         try:
             upload_response = async_to_sync(self.upload_bucket.upload)(
                 file=(os.path.join(storage_folder, filename), file.file),
-                actual_user=auth_user.id, interest=self.id
+                actual_user=auth_user.id, interest=self.id, label="imageset"
             )
         except HTTPStatusError as e:
             self._report_filestore_error(token_id, e, "uploading imageset file to bucket")
@@ -209,12 +206,9 @@ class InterestImageSetMixin(InterestMixinBase):
     @require_permission('read', strip_auth=False)
     def imageset_get_available_contents(self, auth_user=None, session=None):
         # TODO Use artefacts instead and filter by label. Presently, files not
-        #  in the current imageset will not be shown.
-        #  Also consider using the filename prefix in the interim to do this.
-        #  get_stored_files might be able to get the job done, though you will need
-        #  to check on both the upload and publish buckets. Alternatively, a direct
-        #  query on the database might be easier. Filter on interest id and then
-        #  on filename.
+        #  in the current imageset will not be shown. get_interest_artefacts
+        #  should be able to do this. Confirm the frontend isn't relying on
+        #  this in some undocumented way before making the change.
         contents = self.model_instance.imageset.contents
         contents = [{x.export()} for x in contents]
 
